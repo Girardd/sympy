@@ -48,7 +48,7 @@ from sympy.ntheory.factor_ import divisors
 from sympy.ntheory.residue_ntheory import discrete_log, nthroot_mod
 from sympy.polys import (roots, Poly, degree, together, PolynomialError,
                          RootOf, factor, lcm, gcd)
-from sympy.polys.polyerrors import CoercionFailed
+from sympy.polys.polyerrors import CoercionFailed, GeneratorsNeeded
 from sympy.polys.polytools import invert, groebner, poly
 from sympy.polys.solvers import (sympy_eqs_to_ring, solve_lin_sys,
     PolyNonlinearError)
@@ -1038,7 +1038,11 @@ def _solve_as_poly(f, symbol, domain=S.Complexes):
             else:
                 result = ConditionSet(symbol, Eq(f, 0), domain)
     else:
-        poly = Poly(f)
+        try:
+            poly = Poly(f)
+        except GeneratorsNeeded:
+            result = ConditionSet(symbol, Eq(f, 0), domain)
+            return result
         if poly is None:
             result = ConditionSet(symbol, Eq(f, 0), domain)
         gens = [g for g in poly.gens if g.has(symbol)]
